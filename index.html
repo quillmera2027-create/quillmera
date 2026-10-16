@@ -71,6 +71,29 @@ footer{padding:48px 0 24px;color:var(--muted);font-size:.9rem}
 .banner::after{width:130px;height:130px;right:-30px;bottom:-60px}
 .banner span{font-size:3.8rem;position:relative;line-height:1;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
 .ic{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;font-size:1.5rem;margin-bottom:12px;background:linear-gradient(135deg,var(--a),var(--b));box-shadow:0 8px 20px rgba(124,58,237,.25)}
+
+/* حركات انميشن الساعة الرملية والنقاط المتحركة */
+@keyframes flipHourglass {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
+}
+.loading-hourglass {
+  display: inline-block;
+  animation: flipHourglass 2s infinite ease-in-out;
+}
+
+@keyframes dotPulse {
+  0% { opacity: .2; }
+  20% { opacity: 1; }
+  100% { opacity: .2; }
+}
+.loading-dots span {
+  animation: dotPulse 1.4s infinite ease-in-out both;
+}
+.loading-dots span:nth-child(2) { animation-delay: .2s; }
+.loading-dots span:nth-child(3) { animation-delay: .4s; }
+
 @keyframes fl{50%{transform:translateY(-8px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes bob{50%{transform:translateY(-8px) rotate(6deg)}}
@@ -261,7 +284,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
     <div hidden><div class="out" id="out" aria-live="polite"></div>
     <div class="bar"><small id="count"></small><button id="copy" type="button">Copy prompt</button></div></div>
     <button id="ai" type="button" style="width:100%;margin-top:4px">✨ Write it with AI</button>
-    <div id="aibox" style="margin-top:14px" hidden><div class="out" id="aiout" aria-live="polite">⏳ جاري كتابة البرومبت بالذكاء الاصطناعي...</div><div class="bar"><small id="aistat"></small><button id="aicopy" type="button">Copy prompt</button></div></div>
+    <div id="aibox" style="margin-top:14px" hidden><div class="out" id="aiout" aria-live="polite"><span class="loading-hourglass">⏳</span> جاري كتابة البرومبت بالذكاء الاصطناعي<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div><div class="bar"><small id="aistat"></small><button id="aicopy" type="button">Copy prompt</button></div></div>
     <div id="lib" style="margin-top:20px" hidden><h3 style="margin:0 0 4px;font-size:1.05rem">Saved prompts</h3><small id="libnote" style="color:var(--muted)"></small><div id="liblist"></div></div>
   </div>
 </div>
@@ -459,7 +482,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   ].forEach(function(r){D.fr[r[0]]=r[1];D.ar[r[0]]=r[2]});
   var P={en:{p:['Act as an experienced assistant for a ','. Your job: ','Tone: ','Length: ','Context:','Before you write, ask me one question if any key detail is missing. Otherwise, write the final version straight away and end with one short suggestion to improve it.'],w:'words',ti:baseTitle,gt:'Prompt writing guides \u2013 Quillmera'},
    fr:{p:['Agis comme un assistant expérimenté. Je suis ','. Ta mission : ','Ton : ','Longueur : ','Contexte :','Avant d’écrire, pose-moi une question s’il manque un détail clé. Sinon, écris directement la version finale et termine par une courte suggestion pour l’améliorer.'],w:'mots',ti:'Quillmera – Générateur de prompts IA gratuit',gt:'Guides d’écriture de prompts – Quillmera'},
-   ar:{p:['تصرّف كمساعد خبير. أنا ','. مهمتك: ','النبرة: ','الطول: ','السياق:','قبل أن تكتب، اسألني سؤالًا واحدًا إن نقصت تفاصيل أساسية. وإلا فاكتب النسخة النهائية مباشرة واختم باقتراح قصير لتحسينها.'],w:'كلمة',ti:'Quillmera – منشئ برومبتات ذكاء اصطناعي مجانًا',gt:'أدلة كتابة البرومبتات – Quillmera'}};
+   ar:{p:['تصرّف كمساعد خبير. أنا ','. مهمتك: ','النبرة: ','الطول: ','السياق:','قبل أن تكتب، اسألني سؤالًا واحدًا إن نقصت تفاصيل أساسية. وإلا فاكتب النسخة النهائية مباشرة واختم باقتراح قصير لتحسينها.'],w:'كلمة',ti:'Quillmera – منشئ برومبتات ذكاء اصطناعي مجانًا',gt:'أدلة كتابة البرومبتات – المنتدى'}};
   function L(){return P[lang]}
   function cx(c){return lang==='en'?c:(D[lang][c]||c)}
   function setSel(id,en){Array.prototype.forEach.call($(id).options,function(o){if(o.dataset.en===en)o.selected=true})}
@@ -478,7 +501,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   var sv=null;try{sv=localStorage.getItem('ps_lang')}catch(e){}
   sel.value='en';try{localStorage.removeItem('ps_lang')}catch(e){}
   D.fr['Write it with AI']='Écrire avec l’IA';D.ar['Write it with AI']='اكتبه بالذكاء الاصطناعي';
-  var AI={en:{w:'⏳ Writing prompt with AI...',e:'The AI could not answer. Try again in a moment.',l:'English'},fr:{w:'⏳ Rédaction du prompt par l’IA...',e:'L’IA n’a pas pu répondre. Réessayez dans un instant.',l:'French'},ar:{w:'⏳ جاري كتابة البرومبت بالذكاء الاصطناعي...',e:'تعذّر على الذكاء الاصطناعي الرد. حاول مرة أخرى بعد قليل.',l:'Arabic'}},
+  var AI={en:{w:'<span class="loading-hourglass">⏳</span> Writing prompt with AI<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>',e:'The AI could not answer. Try again in a moment.',l:'English'},fr:{w:'<span class="loading-hourglass">⏳</span> Rédaction du prompt par l’IA<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>',e:'L’IA n’a pas pu répondre. Réessayez dans un instant.',l:'French'},ar:{w:'<span class="loading-hourglass">⏳</span> جاري كتابة البرومبت بالذكاء الاصطناعي<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>',e:'تعذّر على الذكاء الاصطناعي الرد. حاول مرة أخرى بعد قليل.',l:'Arabic'}},
     aiB=$('ai'),aiBox=$('aibox'),aiOut=$('aiout'),aiSt=$('aistat'),smp=null,busy=false;
   try{if(window.claude&&claude.use){claude.use('sample').then(function(s){if(s){smp=s;aiB.hidden=false}},function(){})}}catch(e){}
   $('aicopy').addEventListener('click',function(){var b=this;function ok(){b.textContent='Copied';apply();setTimeout(function(){b.textContent='Copy prompt';apply()},1500)}try{navigator.clipboard.writeText(aiOut.textContent).then(ok,function(){})}catch(e){}});
@@ -533,7 +556,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   genPw();
   var so=$('so'),busy2=false;
   $('sb').addEventListener('click',function(){var t=$('sm').value.trim();if(!t||busy2)return;so.hidden=false;if(!smp){so.textContent=AI[lang].e;return}busy2=true;so.textContent=AI[lang].w;
-    smp('Summarize the text below in '+AI[lang].l+'. Give 3 to 6 short bullet points with the key facts, then one final sentence with the main takeaway. Do not add information that is not in the text. Output only the summary.\n\nTEXT:\n'+t.slice(0,12000),{cache:false,onText:function(r){so.textContent=r.text}}).then(function(r){so.textContent=r.text},function(){so.textContent=AI[lang].e}).then(function(){busy2=false})});
+    smp('Summarize the text below in '+AI[lang].l+'. Give 3 to 6 short bullet points with the key facts, then one final sentence with the main takeaway. Do not add information that is not in the text. Output only the summary.\n\nTEXT:\n'+t.slice(0,12000),{cache:false,onText:function(r){so.innerHTML=r.text}}).then(function(r){so.innerHTML=r.text},function(){so.textContent=AI[lang].e}).then(function(){busy2=false})});
   Array.prototype.forEach.call(document.querySelectorAll('#tt,#more'),function(s){s.addEventListener('click',function(e){if(e.target.closest('a'))return;location.hash=s.querySelector('a').getAttribute('href')})});
   D.fr['Home']='Accueil';D.ar['Home']='الرئيسية';
   Array.prototype.forEach.call(document.querySelectorAll('nav a'),function(a){a.addEventListener('click',function(){var hr=a.getAttribute('href');if(hr==='#'?location.hash==='':hr===location.hash)route()})});
@@ -553,7 +576,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
     busy=true;
     aiB.disabled=true;
     aiBox.hidden=false;
-    aiOut.textContent=AI[lang].w; // ظهور رسالة التحميل بالرموز داخل الصندوق
+    aiOut.innerHTML=AI[lang].w; 
     aiSt.textContent='';
 
     var req='You are an expert prompt engineer. Write ONE ready-to-paste prompt for an AI chat assistant (ChatGPT, Claude or Gemini).\nThe person is: '+roleTxt()+'.\nThe task: '+taskTxt()+'.\nTone: '+$('tone').value+'.\nLength of the answer the prompt should ask for: '+$('len').value+'.\nTheir details: '+($('ctx').value.trim()||'none given')+'.\n\nRules: write the prompt in '+AI[lang].l+'. The prompt must speak directly TO the AI in the second person, as a command, starting with a role sentence such as "You are a senior ..." (written in the target language) followed by exactly what to write. Never say "I will ask you" and never describe the request in the third person. Use short paragraphs without labels covering: who the AI is, the exact piece to write and for whom, the key details and selling points, the structure and length of the answer, and three things to avoid. Example of the style, in English: "You are a senior e-commerce copywriter. Write a product description of about 200 words for a handmade leather wallet aimed at men aged 25 to 45. Open with a vivid hook, then cover the material, durability and gift appeal. Use a friendly tone and short paragraphs. Avoid cliches, exaggerated claims and generic phrases." Write in that same style, in the target language, using the person details. Aim for 100 to 200 words. Output ONLY the prompt text, with no preface, no headings and no quotation marks.';
@@ -591,8 +614,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
                 var parsed=JSON.parse(line.substring(6));
                 var chunk=(parsed.candidates&&parsed.candidates[0]&&parsed.candidates[0].content&&parsed.candidates[0].content.parts&&parsed.candidates[0].content.parts[0]&&parsed.candidates[0].content.parts[0].text)||'';
                 if(chunk){
-                  // مسح رسالة التحميل فور وصول أول حرف حقيقي
-                  if(aiOut.textContent.includes(AI[lang].w)){
+                  if(aiOut.querySelector('.loading-hourglass')){
                     aiOut.textContent='';
                   }
                   full+=chunk;
