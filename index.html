@@ -561,7 +561,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   function taskTxt(){var c=$('to').value.trim();return oth('task')&&c?c:$('task').selectedOptions[0].text}
   function syncOther(){$('ro').hidden=!oth('role');$('to').hidden=!oth('task');var p=PHO[lang];$('ro').placeholder=p[0];$('to').placeholder=p[1]}
   ['role','task'].forEach(function(i){$(i).addEventListener('change',syncOther)});sel.addEventListener('change',syncOther);syncOther();
-  var AI_ENDPOINT='';
+  var AI_ENDPOINT='https://quillmera-ai.quillmera2027.workers.dev/';
   if(AI_ENDPOINT&&!smp){smp=function(req,o){return fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout?AbortSignal.timeout(60000):undefined,body:JSON.stringify({prompt:req})}).then(function(r){if(!r.ok)return r.json().catch(function(){return {}}).then(function(j){throw new Error('HTTP '+r.status+(j&&j.detail?': '+j.detail:''))});return r.json()}).then(function(d){if(o&&o.onText)o.onText({text:d.text});return {text:d.text}})}}
   [['Your name','Votre nom','اسمك'],['Your email','Votre e-mail','بريدك الإلكتروني'],['Message','Message','الرسالة'],['Send message','Envoyer le message','أرسل الرسالة']].forEach(function(r){D.fr[r[0]]=r[1];D.ar[r[0]]=r[2]});
   var CK='2429f2e3-500f-4f92-a441-71f61965f00c',CM={en:{ok:'Message sent. Thank you!',er:'Could not send. Please email us instead.',inv:'Please fill in all fields with a valid email.'},fr:{ok:'Message envoyé. Merci !',er:'Envoi impossible. Écrivez-nous par e-mail.',inv:'Veuillez remplir tous les champs avec un e-mail valide.'},ar:{ok:'تم إرسال رسالتك. شكرًا لك!',er:'تعذّر الإرسال. راسلنا عبر البريد الإلكتروني.',inv:'يرجى ملء كل الحقول ببريد إلكتروني صحيح.'}};
