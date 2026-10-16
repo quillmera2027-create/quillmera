@@ -81,8 +81,6 @@ footer{padding:48px 0 24px;color:var(--muted);font-size:.9rem}
 @keyframes pulse{50%{opacity:.28}}
 .art>path,.art>circle,.art>rect{transform-box:fill-box;transform-origin:center}
 @media (prefers-reduced-motion:no-preference){
-
-
 .banner::before{animation:drift 8s ease-in-out infinite}
 .banner::after{animation:drift 11s ease-in-out -3s infinite reverse}
 .banner span{animation:bob 4s ease-in-out infinite}
@@ -447,7 +445,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   ['Free','Gratuit','مجاني'],['No signup','Sans inscription','بلا تسجيل'],['Nothing leaves your browser','Rien ne quitte votre navigateur','لا شيء يغادر متصفحك'],
   ['I am a','Je suis','أنا'],['I need to','Je dois','أحتاج إلى'],['Tone','Ton','النبرة'],['Length','Longueur','الطول'],
   ['Details the AI should know','Détails à connaître pour l’IA','تفاصيل يجب أن يعرفها الذكاء الاصطناعي'],
-  [PH,'Exemple : portefeuilles en cuir faits main, livraison mondiale, clients hommes de 25 à 45 ans','مثال: محافظ جلدية يدوية الصنع، شحن عالمي، العملاء رجال بين 25 و 45 سنة'],
+  [PH,'Exemple : portefeuilles en cuir faits main, livraison mondiale, clients hommes de 25 à 45 ans','مثال: محافظ جلدية يدوية الصنع، شحن عالمي، العملاءرجال بين 25 و 45 سنة'],
   ['small business owner','propriétaire de petite entreprise','صاحب مشروع صغير'],['freelancer','freelance','مستقل'],['marketing manager','responsable marketing','مدير تسويق'],['online store owner','propriétaire de boutique en ligne','صاحب متجر إلكتروني'],['consultant','consultant','مستشار'],['student','étudiant','طالب'],
   ['write a product description','rédiger une description produit','كتابة وصف منتج'],['write a cold outreach email','rédiger un e-mail de prospection','كتابة رسالة بريد تعريفية لعميل جديد'],['draft a customer support reply','rédiger une réponse au support client','صياغة رد لخدمة العملاء'],['plan a week of social posts','planifier une semaine de posts sociaux','تخطيط أسبوع من منشورات التواصل'],['summarize a long document','résumer un long document','تلخيص مستند طويل'],['write a project proposal','rédiger une proposition de projet','كتابة عرض مشروع'],
   ['friendly','amical','ودّية'],['professional','professionnel','مهنية'],['confident','assuré','واثقة'],['playful','enjoué','مرحة'],['formal','formel','رسمية'],
@@ -515,10 +513,6 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   try{lib=JSON.parse(localStorage.getItem('ps_lib')||'[]')}catch(e){lib=[]}
   renderLib();sel.addEventListener('change',renderLib);
   
-  
-  
-  
-  
   (function(){var mq=document.querySelector('.mq'),mt=mq&&mq.querySelector('.mt');if(!mt||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
     var x=0,v=-.7,cruise=-.7,drag=false,lx=0,half=0,last=0;
     function frame(t){var dt=Math.min(32,t-last)/16.67;last=t;if(!half)half=mt.scrollWidth/2;
@@ -562,7 +556,51 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   function syncOther(){$('ro').hidden=!oth('role');$('to').hidden=!oth('task');var p=PHO[lang];$('ro').placeholder=p[0];$('to').placeholder=p[1]}
   ['role','task'].forEach(function(i){$(i).addEventListener('change',syncOther)});sel.addEventListener('change',syncOther);syncOther();
   var AI_ENDPOINT='https://quillmera-ai.quillmera2027.workers.dev';
-  if(AI_ENDPOINT&&!smp){smp=function(req,o){return fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout?AbortSignal.timeout(60000):undefined,body:JSON.stringify({prompt:req})}).then(function(r){if(!r.ok)return r.json().catch(function(){return {}}).then(function(j){throw new Error('HTTP '+r.status+(j&&j.detail?': '+j.detail:''))});return r.json()}).then(function(d){if(o&&o.onText)o.onText({text:d.text});return {text:d.text}})}}
+  if(AI_ENDPOINT&&!smp){
+    smp=function(req,o){
+      return fetch(AI_ENDPOINT,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        signal:AbortSignal.timeout?AbortSignal.timeout(60000):undefined,
+        body:JSON.stringify({prompt:req})
+      }).then(function(r){
+        if(!r.ok)return r.json().catch(function(){return {}}).then(function(j){throw new Error('HTTP '+r.status+(j&&j.detail?': '+j.detail:''))});
+        var reader=r.body?r.body.getReader():null;
+        if(!reader){
+          return r.json().then(function(d){if(o&&o.onText)o.onText({text:d.text});return {text:d.text}});
+        }
+        var decoder=new TextDecoder(),full='',buf='';
+        function streamRead(){
+          return reader.read().then(function(res){
+            if(res.done){
+              if(buf.trim().startsWith('{')){
+                try{var j=JSON.parse(buf);if(j.text){full=j.text;if(o&&o.onText)o.onText({text:full})}}catch(e){}
+              }
+              return {text:full};
+            }
+            buf+=decoder.decode(res.value,{stream:true});
+            var lines=buf.split('\n');
+            buf=lines.pop();
+            for(var i=0;i<lines.length;i++){
+              var line=lines[i].trim();
+              if(line.indexOf('data: ')===0){
+                try{
+                  var parsed=JSON.parse(line.substring(6));
+                  var chunk=(parsed.candidates&&parsed.candidates[0]&&parsed.candidates[0].content&&parsed.candidates[0].content.parts&&parsed.candidates[0].content.parts[0]&&parsed.candidates[0].content.parts[0].text)||'';
+                  if(chunk){
+                    full+=chunk;
+                    if(o&&o.onText)o.onText({text:full});
+                  }
+                }catch(e){}
+              }
+            }
+            return streamRead();
+          });
+        }
+        return streamRead();
+      });
+    };
+  }
   [['Your name','Votre nom','اسمك'],['Your email','Votre e-mail','بريدك الإلكتروني'],['Message','Message','الرسالة'],['Send message','Envoyer le message','أرسل الرسالة']].forEach(function(r){D.fr[r[0]]=r[1];D.ar[r[0]]=r[2]});
   var CK='2429f2e3-500f-4f92-a441-71f61965f00c',CM={en:{ok:'Message sent. Thank you!',er:'Could not send. Please email us instead.',inv:'Please fill in all fields with a valid email.'},fr:{ok:'Message envoyé. Merci !',er:'Envoi impossible. Écrivez-nous par e-mail.',inv:'Veuillez remplir tous les champs avec un e-mail valide.'},ar:{ok:'تم إرسال رسالتك. شكرًا لك!',er:'تعذّر الإرسال. راسلنا عبر البريد الإلكتروني.',inv:'يرجى ملء كل الحقول ببريد إلكتروني صحيح.'}};
   $('cs').addEventListener('click',function(){var n=$('cn').value.trim(),e=$('ce').value.trim(),m=$('cm').value.trim(),r=$('cr'),b=this;
