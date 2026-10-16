@@ -81,8 +81,6 @@ footer{padding:48px 0 24px;color:var(--muted);font-size:.9rem}
 @keyframes pulse{50%{opacity:.28}}
 .art>path,.art>circle,.art>rect{transform-box:fill-box;transform-origin:center}
 @media (prefers-reduced-motion:no-preference){
-
-
 .banner::before{animation:drift 8s ease-in-out infinite}
 .banner::after{animation:drift 11s ease-in-out -3s infinite reverse}
 .banner span{animation:bob 4s ease-in-out infinite}
@@ -263,7 +261,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
     <div hidden><div class="out" id="out" aria-live="polite"></div>
     <div class="bar"><small id="count"></small><button id="copy" type="button">Copy prompt</button></div></div>
     <button id="ai" type="button" style="width:100%;margin-top:4px">✨ Write it with AI</button>
-    <div id="aibox" style="margin-top:14px" hidden><div class="out" id="aiout" aria-live="polite"></div><div class="bar"><small id="aistat"></small><button id="aicopy" type="button">Copy prompt</button></div></div>
+    <div id="aibox" style="margin-top:14px" hidden><div class="out" id="aiout" aria-live="polite">⏳ جاري كتابة البرومبت بالذكاء الاصطناعي...</div><div class="bar"><small id="aistat"></small><button id="aicopy" type="button">Copy prompt</button></div></div>
     <div id="lib" style="margin-top:20px" hidden><h3 style="margin:0 0 4px;font-size:1.05rem">Saved prompts</h3><small id="libnote" style="color:var(--muted)"></small><div id="liblist"></div></div>
   </div>
 </div>
@@ -279,7 +277,6 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
     <div><h3>Get your prompt</h3><p>Tap Write it with AI, then copy.</p></div>
   </div>
 </section>
-
 
 <section id="tt" class="more"><h2><a href="#tools">Free &amp; Pro tools</a></h2><p style="color:var(--muted);max-width:56ch">Free tools now. Pro tools soon.</p><p><a href="#tools">See all tools</a></p></section>
 
@@ -407,11 +404,7 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   });
   var box=$('consent'),KEY='ps_consent';
   function saved(){try{return localStorage.getItem(KEY)}catch(e){return null}}
-  function choose(v){try{localStorage.setItem(KEY,v)}catch(e){} box.style.display='none';
-    /* On your own domain: (adsbygoogle=window.adsbygoogle||[]).requestNonPersonalizedAds=(v==='no'?1:0); */}
-  /* Cookie banner is off until ads are enabled. To turn it on, use: if(!saved()){box.style.display='flex'} */
-  $('c-yes').addEventListener('click',function(){choose('yes')});
-  $('c-no').addEventListener('click',function(){choose('no')});
+  function choose(v){try{localStorage.setItem(KEY,v)}catch(e){} box.style.display='none';}
   var main=document.querySelector('main'),baseTitle=document.title;
   function route(){
     var h=location.hash.slice(1);
@@ -485,14 +478,9 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   var sv=null;try{sv=localStorage.getItem('ps_lang')}catch(e){}
   sel.value='en';try{localStorage.removeItem('ps_lang')}catch(e){}
   D.fr['Write it with AI']='Écrire avec l’IA';D.ar['Write it with AI']='اكتبه بالذكاء الاصطناعي';
-  var AI={en:{w:'Writing\u2026',e:'The AI could not answer. Try again in a moment.',l:'English'},fr:{w:'Écriture…',e:'L’IA n’a pas pu répondre. Réessayez dans un instant.',l:'French'},ar:{w:'جارٍ الكتابة…',e:'تعذّر على الذكاء الاصطناعي الرد. حاول مرة أخرى بعد قليل.',l:'Arabic'}},
+  var AI={en:{w:'⏳ Writing prompt with AI...',e:'The AI could not answer. Try again in a moment.',l:'English'},fr:{w:'⏳ Rédaction du prompt par l’IA...',e:'L’IA n’a pas pu répondre. Réessayez dans un instant.',l:'French'},ar:{w:'⏳ جاري كتابة البرومبت بالذكاء الاصطناعي...',e:'تعذّر على الذكاء الاصطناعي الرد. حاول مرة أخرى بعد قليل.',l:'Arabic'}},
     aiB=$('ai'),aiBox=$('aibox'),aiOut=$('aiout'),aiSt=$('aistat'),smp=null,busy=false;
   try{if(window.claude&&claude.use){claude.use('sample').then(function(s){if(s){smp=s;aiB.hidden=false}},function(){})}}catch(e){}
-  aiB.addEventListener('click',function(){
-    if(busy)return;if(!smp){aiBox.hidden=false;aiSt.textContent=AI[lang].e+' (no AI connection configured)';return}busy=true;aiB.disabled=true;aiBox.hidden=false;aiOut.textContent='';aiSt.textContent=AI[lang].w;
-    var req='You are an expert prompt engineer. Write ONE ready-to-paste prompt for an AI chat assistant (ChatGPT, Claude or Gemini).\nThe person is: '+roleTxt()+'.\nThe task: '+taskTxt()+'.\nTone: '+$('tone').value+'.\nLength of the answer the prompt should ask for: '+$('len').value+'.\nTheir details: '+($('ctx').value.trim()||'none given')+'.\n\nRules: write the prompt in '+AI[lang].l+'. The prompt must speak directly TO the AI in the second person, as a command, starting with a role sentence such as "You are a senior ..." (written in the target language) followed by exactly what to write. Never say "I will ask you" and never describe the request in the third person. Use short paragraphs without labels covering: who the AI is, the exact piece to write and for whom, the key details and selling points, the structure and length of the answer, and three things to avoid. Example of the style, in English: "You are a senior e-commerce copywriter. Write a product description of about 200 words for a handmade leather wallet aimed at men aged 25 to 45. Open with a vivid hook, then cover the material, durability and gift appeal. Use a friendly tone and short paragraphs. Avoid cliches, exaggerated claims and generic phrases." Write in that same style, in the target language, using the person details. Aim for 100 to 200 words. Output ONLY the prompt text, with no preface, no headings and no quotation marks.';
-    smp(req,{cache:false,onText:function(r){aiOut.textContent=r.text}}).then(function(r){aiOut.textContent=r.text;aiSt.textContent='';addItem(r.text)},function(err){aiSt.textContent=AI[lang].e+(err&&err.message?' ('+err.message+')':'')}).then(function(){busy=false;aiB.disabled=false});
-  });
   $('aicopy').addEventListener('click',function(){var b=this;function ok(){b.textContent='Copied';apply();setTimeout(function(){b.textContent='Copy prompt';apply()},1500)}try{navigator.clipboard.writeText(aiOut.textContent).then(ok,function(){})}catch(e){}});
   Array.prototype.forEach.call(document.querySelectorAll('.mt span,#ai'),function(s){var t=s.firstChild,m=t&&t.nodeValue.match(/^(\S+)\s(.+)$/);if(m){var e=document.createElement('em');e.className='ei';e.textContent=m[1];t.nodeValue=' '+m[2];s.insertBefore(e,t)}});
   D.fr['Saved prompts']='Prompts enregistrés';D.ar['Saved prompts']='البرومبتات المحفوظة';
@@ -514,10 +502,6 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   function addItem(x){if(!x||!x.trim())return;lib.unshift({x:x.trim(),t:Date.now(),k:taskTxt()});lib=lib.slice(0,50);persist();renderLib()}
   try{lib=JSON.parse(localStorage.getItem('ps_lib')||'[]')}catch(e){lib=[]}
   renderLib();sel.addEventListener('change',renderLib);
-  
-  
-  
-  
   
   (function(){var mq=document.querySelector('.mq'),mt=mq&&mq.querySelector('.mt');if(!mt||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
     var x=0,v=-.7,cruise=-.7,drag=false,lx=0,half=0,last=0;
@@ -561,8 +545,73 @@ nav a{transition:color .35s ease}nav a::after{transition:transform .5s cubic-bez
   function taskTxt(){var c=$('to').value.trim();return oth('task')&&c?c:$('task').selectedOptions[0].text}
   function syncOther(){$('ro').hidden=!oth('role');$('to').hidden=!oth('task');var p=PHO[lang];$('ro').placeholder=p[0];$('to').placeholder=p[1]}
   ['role','task'].forEach(function(i){$(i).addEventListener('change',syncOther)});sel.addEventListener('change',syncOther);syncOther();
+  
   var AI_ENDPOINT='https://quillmera-ai.quillmera2027.workers.dev';
-  if(AI_ENDPOINT&&!smp){smp=function(req,o){return fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout?AbortSignal.timeout(60000):undefined,body:JSON.stringify({prompt:req})}).then(function(r){if(!r.ok)return r.json().catch(function(){return {}}).then(function(j){throw new Error('HTTP '+r.status+(j&&j.detail?': '+j.detail:''))});return r.json()}).then(function(d){if(o&&o.onText)o.onText({text:d.text});return {text:d.text}})}}
+  
+  aiB.addEventListener('click', function(){
+    if(busy)return;
+    busy=true;
+    aiB.disabled=true;
+    aiBox.hidden=false;
+    aiOut.textContent=AI[lang].w; // ظهور رسالة التحميل بالرموز داخل الصندوق
+    aiSt.textContent='';
+
+    var req='You are an expert prompt engineer. Write ONE ready-to-paste prompt for an AI chat assistant (ChatGPT, Claude or Gemini).\nThe person is: '+roleTxt()+'.\nThe task: '+taskTxt()+'.\nTone: '+$('tone').value+'.\nLength of the answer the prompt should ask for: '+$('len').value+'.\nTheir details: '+($('ctx').value.trim()||'none given')+'.\n\nRules: write the prompt in '+AI[lang].l+'. The prompt must speak directly TO the AI in the second person, as a command, starting with a role sentence such as "You are a senior ..." (written in the target language) followed by exactly what to write. Never say "I will ask you" and never describe the request in the third person. Use short paragraphs without labels covering: who the AI is, the exact piece to write and for whom, the key details and selling points, the structure and length of the answer, and three things to avoid. Example of the style, in English: "You are a senior e-commerce copywriter. Write a product description of about 200 words for a handmade leather wallet aimed at men aged 25 to 45. Open with a vivid hook, then cover the material, durability and gift appeal. Use a friendly tone and short paragraphs. Avoid cliches, exaggerated claims and generic phrases." Write in that same style, in the target language, using the person details. Aim for 100 to 200 words. Output ONLY the prompt text, with no preface, no headings and no quotation marks.';
+
+    fetch(AI_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      signal: AbortSignal.timeout?AbortSignal.timeout(60000):undefined,
+      body: JSON.stringify({prompt: req})
+    }).then(function(r){
+      if(!r.ok)return r.json().catch(function(){return {}}).then(function(j){throw new Error('HTTP '+r.status+(j&&j.detail?': '+j.detail:''))});
+      var reader=r.body?r.body.getReader():null;
+      if(!reader){
+        return r.json().then(function(d){aiOut.textContent=d.text;addItem(d.text);busy=false;aiB.disabled=false;});
+      }
+      var decoder=new TextDecoder(),full='',buf='';
+      function streamRead(){
+        return reader.read().then(function(res){
+          if(res.done){
+            if(buf.trim().startsWith('{')){
+              try{var j=JSON.parse(buf);if(j.text){full=j.text;aiOut.textContent=full;addItem(full)}}catch(e){}
+            }
+            if(full) addItem(full);
+            busy=false;
+            aiB.disabled=false;
+            return;
+          }
+          buf+=decoder.decode(res.value,{stream:true});
+          var lines=buf.split('\n');
+          buf=lines.pop();
+          for(var i=0;i<lines.length;i++){
+            var line=lines[i].trim();
+            if(line.indexOf('data: ')===0){
+              try{
+                var parsed=JSON.parse(line.substring(6));
+                var chunk=(parsed.candidates&&parsed.candidates[0]&&parsed.candidates[0].content&&parsed.candidates[0].content.parts&&parsed.candidates[0].content.parts[0]&&parsed.candidates[0].content.parts[0].text)||'';
+                if(chunk){
+                  // مسح رسالة التحميل فور وصول أول حرف حقيقي
+                  if(aiOut.textContent.includes(AI[lang].w)){
+                    aiOut.textContent='';
+                  }
+                  full+=chunk;
+                  aiOut.textContent=full;
+                }
+              }catch(e){}
+            }
+          }
+          return streamRead();
+        });
+      }
+      return streamRead();
+    }).catch(function(err){
+      aiOut.textContent=AI[lang].e;
+      busy=false;
+      aiB.disabled=false;
+    });
+  });
+
   [['Your name','Votre nom','اسمك'],['Your email','Votre e-mail','بريدك الإلكتروني'],['Message','Message','الرسالة'],['Send message','Envoyer le message','أرسل الرسالة']].forEach(function(r){D.fr[r[0]]=r[1];D.ar[r[0]]=r[2]});
   var CK='2429f2e3-500f-4f92-a441-71f61965f00c',CM={en:{ok:'Message sent. Thank you!',er:'Could not send. Please email us instead.',inv:'Please fill in all fields with a valid email.'},fr:{ok:'Message envoyé. Merci !',er:'Envoi impossible. Écrivez-nous par e-mail.',inv:'Veuillez remplir tous les champs avec un e-mail valide.'},ar:{ok:'تم إرسال رسالتك. شكرًا لك!',er:'تعذّر الإرسال. راسلنا عبر البريد الإلكتروني.',inv:'يرجى ملء كل الحقول ببريد إلكتروني صحيح.'}};
   $('cs').addEventListener('click',function(){var n=$('cn').value.trim(),e=$('ce').value.trim(),m=$('cm').value.trim(),r=$('cr'),b=this;
