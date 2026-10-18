@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quillmera2027-create.github.io/quillmera/sitemap.xml
